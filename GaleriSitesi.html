@@ -1,0 +1,534 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Galeri Polat</title>
+<style>
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  body {
+    background: #f1f2f6;
+    color: #333;
+    scroll-behavior: smooth;
+  }
+
+  /* Header & Menü */
+  header {
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    background: #0984e3;
+    padding: 15px 0;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+    z-index: 1000;
+    opacity: 0;
+    animation: fadeInDown 0.7s forwards;
+    animation-delay: 0.3s;
+  }
+  nav ul {
+    display: flex;
+    justify-content: center;
+    gap: 40px;
+    list-style: none;
+  }
+  nav a {
+    color: white;
+    font-weight: 700;
+    font-size: 1.1rem;
+    text-decoration: none;
+    position: relative;
+    transition: color 0.3s ease;
+  }
+  nav a::after {
+    content: '';
+    position: absolute;
+    width: 0%;
+    height: 2px;
+    bottom: -5px;
+    left: 0;
+    background: #dfe6e9;
+    transition: width 0.3s ease;
+  }
+  nav a:hover,
+  nav a:focus {
+    color: #dfe6e9;
+  }
+  nav a:hover::after,
+  nav a:focus::after {
+    width: 100%;
+  }
+
+  @keyframes fadeInDown {
+    from {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+
+  /* Hero slider */
+  #home {
+    height: 400px;
+    position: relative;
+    color: white;
+    font-weight: 700;
+    font-size: 4rem;
+    user-select: none;
+    background-size: cover;
+    background-position: center;
+    transition: background-image 1s ease-in-out, opacity 1s ease-in-out;
+    padding: 0 40px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    text-align: center;
+    max-width: 1400px;
+    margin: 77px auto 0;
+  }
+
+  /* Araçlar bölümü */
+  section {
+    padding: 100px 20px 60px;
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  .section-title {
+    text-align: center;
+    font-size: 2rem;
+    margin-bottom: 40px;
+  }
+
+  /* Filtre Butonları */
+  .filter-btns {
+    text-align: center;
+    margin-bottom: 30px;
+  }
+  .filter-btns button {
+    background: #0984e3;
+    color: white;
+    border: none;
+    padding: 12px 22px;
+    margin: 0 10px;
+    border-radius: 25px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: background 0.3s, transform 0.3s;
+    box-shadow: 0 6px 14px rgba(9, 132, 227, 0.4);
+    font-size: 1rem;
+  }
+  .filter-btns button:hover,
+  .filter-btns button:focus {
+    background: #74b9ff;
+    transform: scale(1.15);
+    box-shadow: 0 8px 20px rgba(116, 185, 255, 0.7);
+  }
+  .filter-btns button.active {
+    background: #74b9ff;
+    box-shadow: 0 8px 20px rgba(116, 185, 255, 0.8);
+  }
+
+  /* Galeri grid */
+  .gallery {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 32px;
+  }
+  .car {
+    background: white;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 6px 18px rgb(0 0 0 / 0.12);
+    transition: transform 0.35s ease, box-shadow 0.35s ease, background 0.35s ease;
+    cursor: pointer;
+    opacity: 0;
+    transform: translateY(25px);
+    animation-fill-mode: forwards;
+  }
+  .car.visible {
+    opacity: 1;
+    transform: translateY(0);
+    animation: none;
+  }
+  .car:hover {
+    transform: translateY(-15px) scale(1.05);
+    box-shadow: 0 14px 40px rgba(0, 0, 0, 0.25);
+    background: #dfffe0;
+  }
+  .car img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    transition: transform 0.3s ease;
+  }
+  .car-info {
+    padding: 20px 18px;
+  }
+  .car-info h3 {
+    margin-bottom: 12px;
+    font-size: 1.25rem;
+    color: #0984e3;
+  }
+  .car-info p {
+    font-weight: 700;
+    font-size: 1.1rem;
+    color: #2d3436;
+  }
+
+  /* Modal */
+  .modal {
+    position: fixed;
+    top: 0; left: 0;
+    width: 100%; height: 100%;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 2000;
+    padding: 15px;
+  }
+  .modal.show { display: flex; }
+  .modal-content {
+    background: white;
+    padding: 30px 25px;
+    border-radius: 15px;
+    max-width: 520px;
+    width: 100%;
+    position: relative;
+    animation: fadeInScale 0.5s ease forwards;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.3);
+  }
+  @keyframes fadeInScale {
+    from {
+      opacity: 0;
+      transform: scale(0.85);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  .close-btn {
+    position: absolute;
+    top: 12px; right: 15px;
+    background: #ccc;
+    border: none;
+    font-size: 22px;
+    font-weight: bold;
+    border-radius: 50%;
+    width: 40px;
+    height: 40px;
+    line-height: 36px;
+    cursor: pointer;
+    transition: background 0.3s, color 0.3s;
+  }
+  .close-btn:hover {
+    background: #e74c3c;
+    color: white;
+  }
+  .modal-content img {
+    width: 100%;
+    margin: 20px 0 15px;
+    border-radius: 12px;
+    object-fit: cover;
+    box-shadow: 0 6px 18px rgba(0,0,0,0.15);
+  }
+  .modal-content h2 {
+    font-weight: 700;
+    color: #0984e3;
+  }
+  .modal-content p {
+    font-size: 1.1rem;
+    color: #2d3436;
+    line-height: 1.5;
+  }
+  .modal-content .price {
+    font-weight: 800;
+    font-size: 1.3rem;
+    margin-top: 12px;
+    color: #27ae60;
+  }
+
+  /* Konum */
+  iframe {
+    border-radius: 15px;
+    box-shadow: 0 4px 15px rgba(0,0,0,0.2);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    nav ul {
+      gap: 20px;
+    }
+    #home {
+      font-size: 3rem;
+      height: 300px;
+      padding: 0 25px;
+    }
+    .gallery {
+      grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+      gap: 24px;
+    }
+    .car img {
+      height: 150px;
+    }
+  }
+  @media (max-width: 480px) {
+    nav ul {
+      flex-direction: column;
+      gap: 12px;
+    }
+    .filter-btns button {
+      padding: 10px 16px;
+      margin: 6px 4px;
+      font-size: 0.95rem;
+    }
+    #home {
+      font-size: 2.2rem;
+      height: 240px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <nav aria-label="Ana Menü">
+    <ul>
+      <li><a href="#home">ANA MENÜ</a></li>
+      <li><a href="#cars">ARAÇLAR</a></li>
+      <li><a href="#location">KONUMUMUZ</a></li>
+      <li><a href="#contact">İLETİŞİM</a></li>
+    </ul>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section id="home" aria-label="Galerimize Hoşgeldiniz" tabindex="0">
+  Galerimize Hoşgeldiniz
+</section>
+
+<!-- ARAÇLAR -->
+<section id="cars" aria-label="Araçlar Bölümü">
+  <h2 class="section-title">Araçlar</h2>
+
+  <div class="filter-btns" role="group" aria-label="Markaya göre filtreleme">
+    <button class="active" aria-pressed="true" onclick="filterCars('all', this)">Tümü</button>
+    <button aria-pressed="false" onclick="filterCars('mercedes', this)">Mercedes</button>
+    <button aria-pressed="false" onclick="filterCars('renault', this)">Renault</button>
+    <button aria-pressed="false" onclick="filterCars('bmw', this)">BMW</button>
+    <button aria-pressed="false" onclick="filterCars('ford', this)">Ford</button>
+  </div>
+
+  <div class="gallery" aria-live="polite">
+    <article class="car" tabindex="0"
+      data-brand="mercedes"
+      data-name="C Serisi C 180 Komp. BlueEfficiency Luxury"
+      data-img="https://i0.shbdn.com/photos/70/20/98/x5_12537020987ps.jpg"
+      data-desc="Konforlu ve lüks C Serisi. Yakıt verimliliği yüksek."
+      data-price="₺850,000"
+      onclick="openModal(this)">
+      <img src="https://i0.shbdn.com/photos/70/20/98/x5_12537020987ps.jpg" alt="C Serisi C 180 Komp." />
+      <div class="car-info">
+        <h3>C Serisi C 180 Komp. BlueEfficiency Luxury</h3>
+        <p>Konforlu ve lüks C Serisi. Yakıt verimliliği yüksek.</p>
+        <p class="price">₺850,000</p>
+      </div>
+    </article>
+
+    <article class="car" tabindex="0"
+      data-brand="renault"
+      data-name="Clio 1.5 dCi SportTourer Touch"
+      data-img="https://i0.shbdn.com/photos/83/27/23/x5_12518327235i5.jpg"
+      data-desc="SportTourer Touch modeli, yakıt tasarrufu sağlar."
+      data-price="₺550,000"
+      onclick="openModal(this)">
+      <img src="https://i0.shbdn.com/photos/83/27/23/x5_12518327235i5.jpg" alt="Clio 1.5 dCi SportTourer Touch" />
+      <div class="car-info">
+        <h3>Clio 1.5 dCi SportTourer Touch</h3>
+        <p>SportTourer Touch modeli, yakıt tasarrufu sağlar.</p>
+        <p class="price">₺550,000</p>
+      </div>
+    </article>
+
+    <article class="car" tabindex="0"
+      data-brand="renault"
+      data-name="Megane 1.5 Blue DCI Touch"
+      data-img="https://i0.shbdn.com/photos/85/63/11/x5_1231856311pc4.jpg"
+      data-desc="Güvenli ve şık Megane modeli."
+      data-price="₺570,000"
+      onclick="openModal(this)">
+      <img src="https://i0.shbdn.com/photos/85/63/11/x5_1231856311pc4.jpg" alt="Megane 1.5 Blue DCI Touch" />
+      <div class="car-info">
+        <h3>Megane 1.5 Blue DCI Touch</h3>
+        <p>Güvenli ve şık Megane modeli.</p>
+        <p class="price">₺570,000</p>
+      </div>
+    </article>
+
+    <article class="car" tabindex="0"
+      data-brand="bmw"
+      data-name="5 Serisi 525d xDrive Premium"
+      data-img="https://i0.shbdn.com/photos/52/35/49/x5_1237523549suc.jpg"
+      data-desc="Premium segment 5 Serisi, üstün performans."
+      data-price="₺1,250,000"
+      onclick="openModal(this)">
+      <img src="https://i0.shbdn.com/photos/52/35/49/x5_1237523549suc.jpg" alt="5 Serisi 525d xDrive Premium" />
+      <div class="car-info">
+        <h3>5 Serisi 525d xDrive Premium</h3>
+        <p>Premium segment 5 Serisi, üstün performans.</p>
+        <p class="price">₺1,250,000</p>
+      </div>
+    </article>
+
+    <article class="car" tabindex="0"
+      data-brand="ford"
+      data-name="Xenon 4x2"
+      data-img="https://i0.shbdn.com/photos/49/93/32/1244499332rnc.jpg"
+      data-desc="Güçlü ve dayanıklı Xenon modeli."
+      data-price="₺900,000"
+      onclick="openModal(this)">
+      <img src="https://i0.shbdn.com/photos/49/93/32/1244499332rnc.jpg" alt="Xenon 4x2" />
+      <div class="car-info">
+        <h3>Xenon 4x2</h3>
+        <p>Güçlü ve dayanıklı Xenon modeli.</p>
+        <p class="price">₺900,000</p>
+      </div>
+    </article>
+  </div>
+</section>
+
+<!-- KONUM -->
+<section id="location" aria-label="Konumumuz">
+  <h2 class="section-title">Konumumuz</h2>
+  <div style="max-width:900px; margin:0 auto; text-align:center;">
+    <iframe
+      src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3063.119851368143!2d29.00804541516518!3d40.17203467939585!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x14cac8a72c1246e3%3A0x1647e0d09d73a096!2sSo%C4%9Fanl%C4%B1%2C%20106.%20Sk.%20No%3A6%2C%2016190%20Osmangazi%2FBursa!5e0!3m2!1str!2str!4v1698100000000!5m2!1str!2str"
+      width="100%"
+      height="350"
+      style="border:0;"
+      allowfullscreen=""
+      loading="lazy"
+      referrerpolicy="no-referrer-when-downgrade"
+      title="Soğanlı, Osmangazi/Bursa Google Harita Konumu"
+    ></iframe>
+  </div>
+</section>
+
+<!-- İLETİŞİM -->
+<section id="contact" aria-label="İletişim">
+  <h2 class="section-title">İletişim</h2>
+  <div style="max-width:700px; margin: 0 auto; font-size: 1.2rem; line-height: 1.7;">
+    <p>İletişim için aşağıdaki bilgilerden bize ulaşabilirsiniz:</p>
+    <p><strong>Telefon:</strong> +90 555 123 45 67</p>
+    <p><strong>Email:</strong> info@galeripolat.com</p>
+    <p><strong>Adres:</strong> Soğanlı, 106. Sk. No:6, 16190 Osmangazi̇/Bursa</p>
+  </div>
+</section>
+
+<!-- Modal -->
+<div id="carModal" class="modal" role="dialog" aria-modal="true" aria-labelledby="modalTitle" tabindex="-1">
+  <div class="modal-content">
+    <button class="close-btn" aria-label="Kapat" onclick="closeModal()">&times;</button>
+    <h2 id="modalTitle"></h2>
+    <img src="" alt="" id="modalImage" />
+    <p id="modalDesc"></p>
+    <p class="price" id="modalPrice"></p>
+  </div>
+</div>
+
+<script>
+  // Hero slider
+  const heroImages = [
+    'https://2.bp.blogspot.com/--XlKtNJMMlc/V6NlUL-vORI/AAAAAAAAXQI/85hmkPGai50eFNx1l4dj24TU65s7JByqwCLcB/s1600/volkswagen-classic-car.jpeg',
+    'https://www.kanvas-tablo.net/wp-content/uploads/Araba-Foto%C4%9Fraflar%C4%B1-15.jpg',
+    'https://st4.depositphotos.com/9983820/23090/i/450/depositphotos_230909198-stock-photo-beautiful-black-modern-car-stands.jpg'
+  ];
+  let currentHeroIndex = 0;
+  const homeSection = document.getElementById('home');
+
+  function updateHeroBackground() {
+    homeSection.style.opacity = 0;
+    setTimeout(() => {
+      homeSection.style.backgroundImage = `url(${heroImages[currentHeroIndex]})`;
+      homeSection.style.opacity = 1;
+      currentHeroIndex = (currentHeroIndex + 1) % heroImages.length;
+    }, 1000);
+  }
+
+  homeSection.style.backgroundImage = `url(${heroImages[0]})`;
+  setInterval(updateHeroBackground, 5000);
+
+  // Araç filtreleme (marka bazlı)
+  function filterCars(brand, btn) {
+    const cars = document.querySelectorAll('.car');
+    document.querySelectorAll('.filter-btns button').forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-pressed', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-pressed', 'true');
+
+    cars.forEach(car => {
+      if(brand === 'all' || car.getAttribute('data-brand') === brand){
+        car.style.display = 'block';
+      } else {
+        car.style.display = 'none';
+      }
+    });
+  }
+
+  // Modal açma/kapatma
+  const modal = document.getElementById('carModal');
+  const modalTitle = document.getElementById('modalTitle');
+  const modalImage = document.getElementById('modalImage');
+  const modalDesc = document.getElementById('modalDesc');
+  const modalPrice = document.getElementById('modalPrice');
+
+  function openModal(carElem) {
+    modalTitle.textContent = carElem.getAttribute('data-name');
+    modalImage.src = carElem.getAttribute('data-img');
+    modalImage.alt = carElem.getAttribute('data-name');
+    modalDesc.textContent = carElem.getAttribute('data-desc');
+    modalPrice.textContent = carElem.getAttribute('data-price');
+    modal.classList.add('show');
+    modal.focus();
+  }
+
+  function closeModal() {
+    modal.classList.remove('show');
+  }
+
+  // Araçlar görünme animasyonu
+  const cars = document.querySelectorAll('.car');
+  const observer = new IntersectionObserver(entries => {
+    entries.forEach(entry => {
+      if(entry.isIntersecting){
+        entry.target.classList.add('visible');
+      } else {
+        entry.target.classList.remove('visible');
+      }
+    });
+  }, {threshold: 0.2});
+
+  cars.forEach(car => observer.observe(car));
+
+  // Modal ESC tuşu ile kapatma
+  window.addEventListener('keydown', e => {
+    if(e.key === "Escape" && modal.classList.contains('show')) {
+      closeModal();
+    }
+  });
+
+  // Modal dışına tıklayınca kapatma
+  modal.addEventListener('click', e => {
+    if(e.target === modal) closeModal();
+  });
+</script>
+
+</body>
+</html>
